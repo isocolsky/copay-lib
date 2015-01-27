@@ -9,6 +9,7 @@ log.debug = log.verbose;
 
 var Wallet = require('./model/wallet');
 var Copayer = require('./model/copayer');
+var Address = require('./model/address');
 
 var Storage = function (opts) {
 	opts = opts || {};
@@ -51,9 +52,26 @@ Storage.prototype.storeCopayer = function (copayer, cb) {
 	this.db.put('wallet-' + copayer.walletId + '-copayer-' + copayer.id, copayer, cb);
 };
 
-Storage.prototype._dump = function (opts) {
-  this.db.readStream(opts)
-    .on('data', console.log);
+Storage.prototype.getAddresses = function (walletId, cb) {
+	var addresses = [];
+	var key = 'wallet-' + walletId + '-address-';
+	this.db.createReadStream({ gte: key, lt: key + '~' })
+		.on('data', function (data) {
+			addresses.push(Address.fromObj(data.value));
+		})
+		.on('error', function (err) {
+			if (err.notFound) return cb();
+			return cb(err);
+		})
+		.on('end', function () {
+			return cb(null, addresses);
+		});
+};
+
+Storage.prototype._dump = function (cb) {
+  this.db.readStream()
+    .on('data', console.log)
+    .on('end', function () { if (cb) return cb(); });
 };
 
 module.exports = Storage;

@@ -10,6 +10,7 @@ function Wallet(opts) {
 	this.m = opts.m;
 	this.n = opts.n;
 	this.status = 'pending';
+	this.publicKeyRing = [];
 };
 
 Wallet.fromObj = function (obj) {
@@ -20,6 +21,7 @@ Wallet.fromObj = function (obj) {
 	x.m = obj.m;
 	x.n = obj.n;
 	x.status = obj.status;
+	x.publicKeyRing = obj.publicKeyRing;
 	return x;
 };
 
